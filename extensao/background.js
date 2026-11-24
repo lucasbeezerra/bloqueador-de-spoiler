@@ -44,8 +44,11 @@ async function bspTocador(acao) {
       justification: "Música do aviso de confirmação"
     });
   }
-  chrome.runtime.sendMessage({ alvo: "tocador", musica: acao }).catch(() => {});
+  return chrome.runtime.sendMessage({ alvo: "tocador", musica: acao }).catch(() => null);
 }
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg && (msg.musica === "tocar" || msg.musica === "parar") && !msg.alvo) bspTocador(msg.musica).catch(() => {});
+chrome.runtime.onMessage.addListener((msg, _de, responder) => {
+  if (msg && (msg.musica === "tocar" || msg.musica === "parar") && !msg.alvo) {
+    bspTocador(msg.musica).then((r) => responder(r || {}), () => responder({}));
+    return true; // avisa o site se está tocando o musica.mp3 (para mostrar o crédito)
+  }
 });

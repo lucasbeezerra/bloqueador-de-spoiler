@@ -345,7 +345,8 @@
     }
     .senha:focus { border-color: #b3261e; }
     .senha.certo { border-color: #2e9d4f; background: #f1faf3; }
-    .musica { font-size: 12px; color: #888; }
+    .credito { font-size: 11px; color: #8a8a92; line-height: 1.35; margin-top: 2px; }
+    .credito[hidden] { display: none; }
   `;
 
   let ui = null;
@@ -369,6 +370,7 @@
       '<span class="big">Tem certeza, Big? 🤨</span>' +
       '<span class="senha-dica">Para ver, escreva: <i>quero sim, senhor Capitão Big</i></span>' +
       '<input class="senha" type="text" autocomplete="off" spellcheck="false" placeholder="quero sim, senhor Capitão Big">' +
+      '<span class="credito" hidden></span>' +
       '<div class="botoes"><button class="nao">Não, deixa escondido</button><button class="sim">Sim, mostrar</button></div>' +
       "</div></div>";
     document.documentElement.appendChild(host);
@@ -381,7 +383,8 @@
       barra: raiz.querySelector(".barra i"),
       nao: raiz.querySelector(".nao"),
       sim: raiz.querySelector(".sim"),
-      senha: raiz.querySelector(".senha")
+      senha: raiz.querySelector(".senha"),
+      credito: raiz.querySelector(".credito")
     };
     ui.nao.addEventListener("click", fecharConfirmacao);
     ui.senha.addEventListener("input", conferirSenha);
@@ -426,12 +429,23 @@
   }
 
   // Música da confirmação: toca o arquivo musica.mp3 da pasta da extensão (se existir).
+  const CREDITOS = {
+    musica: "🎵 Song: Cartoon, Jéja - On &amp; On (feat. Daniel Levi) [NCS Release]<br>Music provided by NoCopyrightSounds · Free Download/Stream: ncs.io",
+    capitao: "🎤 Cantarolada original, feita em casa para o Capitão Big"
+  };
   let musicaTocando = false;
   window.addEventListener("pagehide", () => musica("parar"));
   function musica(acao) {
     if (acao === "tocar" ? musicaTocando : !musicaTocando) return;
     musicaTocando = acao === "tocar";
-    try { chrome.runtime.sendMessage({ musica: acao }).catch(() => {}); } catch (e) {}
+    if (ui) ui.credito.hidden = true;
+    try {
+      chrome.runtime.sendMessage({ musica: acao }).then((r) => {
+        if (!ui || !musicaTocando || !r || !CREDITOS[r.fonte]) return;
+        ui.credito.innerHTML = CREDITOS[r.fonte];
+        ui.credito.hidden = false;
+      }, () => {});
+    } catch (e) {}
   }
 
   function abrirConfirmacao(b, texto, acao) {

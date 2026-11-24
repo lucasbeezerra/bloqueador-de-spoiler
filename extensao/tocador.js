@@ -48,29 +48,41 @@ function bspEscracho(ctx, saida, t0) {
 
 // ---------- Tocador ----------
 const audio = document.getElementById("musica");
-// Trecho do musica.mp3 que toca (o drop), em segundos. Chega no fim, volta para o começo do trecho.
+// Ordem do que toca:
+//  1) musica.mp3 (se você colocar um na pasta; não vai para o GitHub): só o trecho TRECHO_INICIO a TRECHO_FIM
+//  2) som-do-capitao.mp3 (a cantarolada original que vem com a extensão): inteiro, repetindo
+//  3) o escracho feito por código
 const TRECHO_INICIO = 45; // 0:45
 const TRECHO_FIM = 76;    // 1:16
-audio.loop = false;
-audio.addEventListener("timeupdate", () => {
-  if (audio.currentTime >= TRECHO_FIM || audio.currentTime < TRECHO_INICIO - 1) audio.currentTime = TRECHO_INICIO;
-});
-audio.addEventListener("ended", () => { audio.currentTime = TRECHO_INICIO; audio.play().catch(() => {}); });
-let temMp3 = null; // null = ainda não sei
+let fonte = null; // "musica" | "capitao" | "escracho"
 let ctx = null, volume = null, timer = null;
 
-async function conferirMp3() {
-  if (temMp3 !== null) return temMp3;
-  // Carrega o arquivo inteiro na memória: assim dá para pular direto para o drop.
+audio.addEventListener("timeupdate", () => {
+  if (fonte !== "musica") return;
+  if (audio.currentTime >= TRECHO_FIM || audio.currentTime < TRECHO_INICIO - 1) audio.currentTime = TRECHO_INICIO;
+});
+audio.addEventListener("ended", () => {
+  audio.currentTime = fonte === "musica" ? TRECHO_INICIO : 0;
+  audio.play().catch(() => {});
+});
+
+async function carregar(arquivo) {
   try {
-    const r = await fetch("musica.mp3");
-    temMp3 = r.ok;
-    if (temMp3) {
-      audio.src = URL.createObjectURL(await r.blob());
-      await new Promise((ok) => { audio.addEventListener("loadedmetadata", ok, { once: true }); setTimeout(ok, 3000); });
-    }
-  } catch (e) { temMp3 = false; }
-  return temMp3;
+    const r = await fetch(arquivo);
+    if (!r.ok) return false;
+    // Carrega o arquivo inteiro na memória: assim dá para pular direto para o trecho.
+    audio.src = URL.createObjectURL(await r.blob());
+    await new Promise((ok) => { audio.addEventListener("loadedmetadata", ok, { once: true }); setTimeout(ok, 3000); });
+    return true;
+  } catch (e) { return false; }
+}
+
+async function escolherFonte() {
+  if (fonte) return fonte;
+  if (await carregar("musica.mp3")) fonte = "musica";
+  else if (await carregar("som-do-capitao.mp3")) fonte = "capitao";
+  else fonte = "escracho";
+  return fonte;
 }
 
 function rodada() {
@@ -84,8 +96,8 @@ function pararEscracho() {
 }
 
 async function tocar() {
-  if (await conferirMp3()) {
-    audio.currentTime = TRECHO_INICIO;
+  if ((await escolherFonte()) !== "escracho") {
+    audio.currentTime = fonte === "musica" ? TRECHO_INICIO : 0;
     return audio.play().catch(() => {});
   }
   pararEscracho();
@@ -103,8 +115,12 @@ function parar() {
 }
 
 if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
-  chrome.runtime.onMessage.addListener((msg) => {
+  chrome.runtime.onMessage.addListener((msg, _de, responder) => {
     if (!msg || msg.alvo !== "tocador") return;
-    if (msg.musica === "tocar") tocar(); else if (msg.musica === "parar") parar();
+    if (msg.musica === "tocar") {
+      tocar().then(() => responder({ fonte }), () => responder({ fonte }));
+      return true; // resposta chega depois
+    }
+    if (msg.musica === "parar") parar();
   });
 }
