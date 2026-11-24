@@ -1,0 +1,109 @@
+/* ---------- Item borrado ---------- */
+.bsp-borrado {
+  filter: blur(26px) grayscale(0.7) brightness(0.92) !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: filter 0.35s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+/* Ao passar o mouse: "acorda" um pouquinho e cresce de leve. */
+.bsp-borrado:hover {
+  filter: blur(22px) grayscale(0.5) brightness(1) !important;
+  transform: scale(1.015) !important;
+}
+/* Ao apertar: afunda, como um botão. */
+.bsp-borrado:active,
+.bsp-borrado.bsp-escolhido {
+  transform: scale(0.97) !important;
+  transition: transform 0.1s ease !important;
+}
+/* Nada dentro do que está borrado responde ao mouse (evita prévia de vídeo ao passar o mouse). */
+.bsp-borrado * {
+  pointer-events: none !important;
+}
+/* Prévias de vídeo que o site abre por cima do item (ex.: YouTube): somem enquanto o mouse está num item borrado. */
+html.bsp-sem-previa ytd-video-preview,
+html.bsp-sem-previa #video-preview,
+html.bsp-sem-previa #inline-preview-player,
+html.bsp-sem-previa ytd-inline-preview-player,
+html.bsp-sem-previa [class*="inline-preview"],
+html.bsp-sem-previa [id*="inline-preview"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Ao revelar: o borrão vai sumindo suavemente. */
+.bsp-revelado {
+  transition: filter 0.7s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  animation: bsp-aparece 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes bsp-aparece {
+  0% { transform: scale(0.97); }
+  60% { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Capa da página inteira ---------- */
+#bsp-capa {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 20, 0.85) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  animation: bsp-surge 0.25s ease;
+}
+@keyframes bsp-surge { from { opacity: 0; } to { opacity: 1; } }
+/* Capa recolocada (o site apagou): volta sem animação, para não piscar. */
+#bsp-capa.bsp-sem-animacao,
+#bsp-capa.bsp-sem-animacao .bsp-caixa,
+#bsp-capa.bsp-sem-animacao .bsp-escudo { animation: none !important; }
+#bsp-capa .bsp-caixa {
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: 20px;
+  padding: 28px 32px;
+  max-width: 360px;
+  width: calc(100% - 32px);
+  box-sizing: border-box;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  font-size: 15px;
+  line-height: 1.4;
+  animation: bsp-pula 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes bsp-pula { from { transform: scale(0.8) translateY(14px); } to { transform: none; } }
+#bsp-capa .bsp-escudo { font-size: 44px; animation: bsp-balanca 0.6s ease 0.15s; }
+@keyframes bsp-balanca {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-12deg); }
+  50% { transform: rotate(10deg); }
+  75% { transform: rotate(-5deg); }
+}
+#bsp-capa b { font-size: 19px; }
+#bsp-capa span { color: #555; }
+#bsp-capa .bsp-botoes { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+#bsp-capa button {
+  flex: 1;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+#bsp-capa button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18); }
+#bsp-capa button:active { transform: scale(0.94); box-shadow: none; }
+#bsp-voltar { background: #b3261e; color: #fff; }
+#bsp-voltar:hover { background: #9c1f18; }
+#bsp-mostrar { background: #efeff2; color: #333; }
+#bsp-mostrar:hover { background: #e4e4e9; }

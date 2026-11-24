@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Teste site liberado</title>
+<link rel="stylesheet" href="../extensao/estilo.css"></head>
+<body>
+<p>Neste site liberado, Vingadores e Thanos devem aparecer normalmente.</p>
+<script>
+  // Simula a configuração salva: "localhost" está na lista de sites liberados.
+  window.chrome = { storage: { sync: { get: (k, cb) => cb({ sitesLiberados: ["localhost"] }) }, onChanged: { addListener() {} } } };
+</script>
+<script src="../extensao/palavras.js"></script>
+<script src="../extensao/content.js"></script>
+</body>
+</html>

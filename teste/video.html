@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>YouTube</title>
+<link rel="stylesheet" href="../extensao/estilo.css"></head>
+<body style="font-family:system-ui;padding:20px">
+<p>Simula abrir um link de vídeo do YouTube: o título só vira spoiler depois, o vídeo tenta tocar sozinho e o site apaga a capa.</p>
+<canvas id="c" width="160" height="90" style="display:none"></canvas>
+<video id="v" width="320" height="180" style="background:#000"></video>
+<script>
+  // "Vídeo" feito com um canvas animado (não precisa de arquivo).
+  const c = document.getElementById('c'), ctx = c.getContext('2d'); let t = 0;
+  setInterval(() => { ctx.fillStyle = `hsl(${t++ * 5},80%,50%)`; ctx.fillRect(0, 0, 160, 90); }, 50);
+  const v = document.getElementById('v');
+  v.muted = true; v.srcObject = c.captureStream(20);
+  window.__tocou = 0;
+  v.addEventListener('playing', () => window.__tocou++);
+  // O site insiste em tocar (autoplay).
+  setInterval(() => v.play().catch(() => {}), 300);
+  // O título vira spoiler depois de carregar (como o YouTube faz).
+  setTimeout(() => { document.title = 'Avengers: Doomsday trailer - YouTube'; }, 800);
+  // O site apaga a capa uma vez.
+  setTimeout(() => { const k = document.getElementById('bsp-capa'); if (k) { k.remove(); window.__apagou = true; } }, 1800);
+</script>
+<script src="../extensao/palavras.js"></script>
+<script src="../extensao/content.js"></script>
+</body>
+</html>

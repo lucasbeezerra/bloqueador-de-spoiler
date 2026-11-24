@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Página de teste</title>
+<link rel="stylesheet" href="../extensao/estilo.css">
+<style>body{font-family:system-ui;max-width:700px;margin:20px auto;padding:0 16px} .card{border:1px solid #ccc;border-radius:8px;padding:10px;margin:10px 0}</style>
+</head>
+<body>
+<h1>Teste do Bloqueador</h1>
+<p>Parágrafo normal sobre futebol e o tempo amanhã. O autor (author) foi thorough.</p>
+<article class="card"><img alt="cena de Vingadores: Doomsday" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='80'><rect width='200' height='80' fill='red'/></svg>"><h3>Notícia sem palavra no texto</h3></article>
+<article class="card"><h3>CAPITÃO AMÉRICA aparece no trailer</h3><p>Detalhes do filme...</p></article>
+<p>Este parágrafo fala do Doutor Destino no meio de outras coisas.</p>
+<p>Post com #AvengersDoomsday na hashtag.</p>
+<p>Nada aqui: Visão de futuro e o falcão voou.</p>
+<ul><li>Item normal</li><li>Item com homem aranha</li></ul>
+<div contenteditable="true" id="editor" class="card">E-mail sendo escrito: <img alt="poster Vingadores" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='20'/>"> falando de Thor</div>
+<article class="card" id="post"><p>Post sobre o Hulk</p><textarea placeholder="Comentar..."></textarea></article>
+<article class="card" id="short"><div id="thumb" style="height:60px;background:#345"></div><p>Avengers Doomsday looks insane</p></article>
+<article class="card" id="normal"><div id="thumb2" style="height:60px;background:#543"></div><p>Vídeo normal de culinária</p></article>
+<div id="video-preview" style="display:none;position:fixed;top:20px;right:20px;width:200px;height:120px;background:lime;z-index:99">PRÉVIA TOCANDO</div>
+<script>
+  // Simula o YouTube: passar o mouse no card abre uma prévia por cima.
+  const prev = document.getElementById('video-preview');
+  for (const id of ['short', 'normal']) {
+    const c = document.getElementById(id);
+    c.addEventListener('mouseenter', () => { prev.style.display = 'block'; window.__previaAbriu = (window.__previaAbriu || []).concat(id); });
+    c.addEventListener('mouseleave', () => { prev.style.display = 'none'; });
+  }
+</script>
+<div id="depois"></div>
+<script src="../extensao/palavras.js"></script>
+<script src="../extensao/content.js"></script>
+<script>
+  setTimeout(() => {
+    const p = document.createElement('div'); p.className='card';
+    p.innerHTML = '<b>Adicionado depois:</b> Thanos volta?';
+    document.getElementById('depois').appendChild(p);
+    const q = document.createElement('div'); q.className='card';
+    q.textContent = 'Adicionado depois, sem spoiler.';
+    document.getElementById('depois').appendChild(q);
+  }, 500);
+</script>
+</body>
+</html>

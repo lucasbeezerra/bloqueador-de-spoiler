@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<style>
+  body { width: 300px; margin: 0; padding: 16px; font-family: system-ui, "Segoe UI", sans-serif; font-size: 14px; color: #1a1a1a; background: #fff; }
+  h1 { font-size: 16px; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .linha { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f3f3f5; border-radius: 10px; }
+  .chave { position: relative; width: 42px; height: 24px; }
+  .chave input { opacity: 0; width: 0; height: 0; }
+  .bola { position: absolute; inset: 0; background: #ccc; border-radius: 24px; cursor: pointer; transition: .2s; }
+  .bola::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+  input:checked + .bola { background: #b3261e; }
+  input:checked + .bola::before { transform: translateX(18px); }
+  label.t { display: block; margin: 14px 0 6px; font-weight: 600; }
+  textarea { width: 100%; box-sizing: border-box; height: 180px; font: 13px/1.4 system-ui, sans-serif; border: 1px solid #ccc; border-radius: 8px; padding: 8px; resize: vertical; }
+  .dica { color: #666; font-size: 12px; margin: 4px 0 10px; }
+  .botoes { display: flex; gap: 8px; }
+  button { flex: 1; border: 0; border-radius: 8px; padding: 9px; cursor: pointer; font: inherit; }
+  #salvar { background: #b3261e; color: #fff; }
+  #padrao { background: #eee; }
+  #aviso { color: #1b7a3a; font-size: 12px; height: 16px; margin-top: 8px; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>🛡️ Bloqueador de Spoiler</h1>
+  <div class="linha">
+    <span id="estado">Ligado</span>
+    <label class="chave"><input type="checkbox" id="ligado" checked><span class="bola"></span></label>
+  </div>
+  <div class="linha" id="linhaSite" style="margin-top:8px;display:none">
+    <span>Ativo em <b id="site"></b></span>
+    <label class="chave"><input type="checkbox" id="ativoSite" checked><span class="bola"></span></label>
+  </div>
+  <div class="dica" id="dicaSite" style="display:none">Desligue aqui para liberar este site (seus painéis, por exemplo).</div>
+  <label class="t" for="palavras">Palavras bloqueadas</label>
+  <textarea id="palavras" spellcheck="false"></textarea>
+  <div class="dica">Uma por linha. Acento e maiúscula não importam.</div>
+  <div class="botoes">
+    <button id="salvar">Salvar</button>
+    <button id="padrao">Lista original</button>
+  </div>
+  <div id="aviso"></div>
+  <script src="palavras.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
