@@ -3,7 +3,7 @@
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $pasta = $PSScriptRoot
-$url = 'https://github.com/lucasbeezerra/bloqueador-de-spoiler/releases/latest/download/bloqueador-de-spoiler.zip'
+$api = 'https://api.github.com/repos/lucasbeezerra/bloqueador-de-spoiler/releases/latest'
 $tmp = Join-Path $env:TEMP ('bloqueador-' + [guid]::NewGuid())
 try {
   $antes = (Get-Content (Join-Path $pasta 'manifest.json') -Raw | ConvertFrom-Json).version
@@ -11,7 +11,11 @@ try {
   Write-Host '  Baixando a versão mais nova...' -ForegroundColor Cyan
   New-Item -ItemType Directory $tmp | Out-Null
   $zip = Join-Path $tmp 'nova.zip'
-  Invoke-WebRequest -Uri $url -OutFile $zip -UseBasicParsing
+  $semCache = @{ 'Cache-Control' = 'no-cache'; 'Pragma' = 'no-cache' }
+  $info = Invoke-RestMethod -Uri ($api + '?t=' + [DateTime]::Now.Ticks) -Headers $semCache -UseBasicParsing
+  $url = ($info.assets | Where-Object { $_.name -like '*.zip' } | Select-Object -First 1).browser_download_url
+  if (-not $url) { throw 'Não achei o arquivo da versão nova no GitHub.' }
+  Invoke-WebRequest -Uri $url -OutFile $zip -Headers $semCache -UseBasicParsing
   Expand-Archive $zip (Join-Path $tmp 'nova') -Force
   $manifesto = Get-ChildItem (Join-Path $tmp 'nova') -Recurse -Filter manifest.json | Select-Object -First 1
   if (-not $manifesto) { throw 'O arquivo baixado não tem a extensão dentro.' }
