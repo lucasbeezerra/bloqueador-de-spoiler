@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bloqueador de Spoiler",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Borra tudo que fala de Vingadores / Marvel para você não pegar spoiler. Clique para revelar.",
   "permissions": ["storage", "activeTab"],
   "action": {

@@ -29,6 +29,13 @@
     c.addEventListener('mouseleave', () => { prev.style.display = 'none'; });
   }
 </script>
+<h2>Fotos sem texto (só o nome do arquivo)</h2>
+<div class="card"><img id="foto-spoiler" width="120" height="60" src="/imagens/avengers-doomsday-trailer.jpg"> (deve borrar)</div>
+<div class="card"><img id="foto-normal" width="120" height="60" src="/imagens/bolo-de-cenoura.jpg?v=avengers"> (não deve borrar)</div>
+<div class="card"><img id="foto-author" width="120" height="60" src="/imagens/author_thorough_2026.jpg"> (não deve borrar)</div>
+<div class="card"><picture id="foto-picture"><source srcset="/imagens/thanos_cena-final.webp 1x, /imagens/x.webp 2x"><img width="120" height="60" src="/imagens/qualquer.jpg"></picture> (deve borrar)</div>
+<div class="card"><img id="foto-depois" width="120" height="60" src="/imagens/carregando.gif"> (deve borrar depois de 0,5s)</div>
+<div class="card"><video id="video-capa" width="120" height="60" poster="/imagens/Doutor%20Destino.png"></video> (deve borrar)</div>
 <div id="depois"></div>
 <script src="../extensao/palavras.js"></script>
 <script src="../extensao/content.js"></script>
@@ -40,6 +47,7 @@
     const q = document.createElement('div'); q.className='card';
     q.textContent = 'Adicionado depois, sem spoiler.';
     document.getElementById('depois').appendChild(q);
+    document.getElementById('foto-depois').src = '/imagens/homem-aranha.jpg';
   }, 500);
 </script>
 </body>

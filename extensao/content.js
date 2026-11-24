@@ -46,11 +46,33 @@
     return !!(regex && texto && regex.test(normalizar(texto)));
   }
 
+  // Nome do arquivo das fotos e vídeos ("avengers-doomsday-trailer.jpg" vira "avengers doomsday trailer jpg").
+  // Só o caminho do endereço (sem o "?..." do final, que costuma ser código aleatório).
+  function textoDoEndereco(url) {
+    if (!url || /^(data|blob):/i.test(url)) return "";
+    let caminho = url;
+    try { caminho = new URL(url, location.href).pathname; } catch (e) {}
+    try { caminho = decodeURIComponent(caminho); } catch (e) {}
+    return " " + caminho.replace(/[-_/+.,%=]/g, " ");
+  }
+
+  function textoDosArquivos(el) {
+    if (!el.getAttribute) return "";
+    let t = textoDoEndereco(el.getAttribute("src")) + textoDoEndereco(el.getAttribute("poster"));
+    const srcset = el.getAttribute("srcset");
+    if (srcset) srcset.split(",").forEach((parte) => { t += textoDoEndereco(parte.trim().split(/\s+/)[0]); });
+    return t;
+  }
+
+  const COM_ATRIBUTO = "img,source,video,[title],[aria-label]";
+
   function textoDoElemento(el) {
     let t = el.textContent || "";
     for (const a of ["alt", "title", "aria-label"]) if (el.getAttribute && el.getAttribute(a)) t += " " + el.getAttribute(a);
-    el.querySelectorAll && el.querySelectorAll("img[alt],[title],[aria-label]").forEach((x) => {
+    t += textoDosArquivos(el);
+    el.querySelectorAll && el.querySelectorAll(COM_ATRIBUTO).forEach((x) => {
       t += " " + (x.getAttribute("alt") || "") + " " + (x.getAttribute("title") || "") + " " + (x.getAttribute("aria-label") || "");
+      t += textoDosArquivos(x);
     });
     return t;
   }
@@ -111,8 +133,11 @@
   function conferirAtributos(el) {
     if (el.isContentEditable || el.closest(".bsp-borrado, .bsp-revelado, #bsp-capa")) return;
     const t = (el.getAttribute("alt") || "") + " " + (el.getAttribute("aria-label") || "") +
-      " " + (el.hasAttribute("data-bsp-title") ? "" : el.getAttribute("title") || "");
-    if (temSpoiler(t)) borrar(escolherAlvo(el));
+      " " + (el.hasAttribute("data-bsp-title") ? "" : el.getAttribute("title") || "") + textoDosArquivos(el);
+    if (!temSpoiler(t)) return;
+    // <source> fica dentro de <picture>/<video> e não aparece na tela: borra quem a contém.
+    const base = el.tagName === "SOURCE" && el.parentElement ? el.parentElement : el;
+    borrar(escolherAlvo(base));
   }
 
   function varrer(raiz) {
@@ -122,8 +147,8 @@
     const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
     let n;
     while ((n = w.nextNode())) conferirTexto(n);
-    if (raiz.matches("img[alt],[title],[aria-label]")) conferirAtributos(raiz);
-    raiz.querySelectorAll("img[alt],[title],[aria-label]").forEach(conferirAtributos);
+    if (raiz.matches(COM_ATRIBUTO)) conferirAtributos(raiz);
+    raiz.querySelectorAll(COM_ATRIBUTO).forEach(conferirAtributos);
   }
 
   // Sites como o YouTube reaproveitam o mesmo cartão com outro vídeo: reconfere.
@@ -426,7 +451,7 @@
   function ligarObservador() {
     observador.observe(document.documentElement, {
       childList: true, subtree: true, characterData: true,
-      attributes: true, attributeFilter: ["alt", "title", "aria-label"]
+      attributes: true, attributeFilter: ["alt", "title", "aria-label", "src", "srcset", "poster"]
     });
   }
 
