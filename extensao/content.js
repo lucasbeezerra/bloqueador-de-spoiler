@@ -368,8 +368,8 @@
       '<div class="risco"><span class="risco-txt"></span><div class="barra"><i></i></div></div>' +
       '<b class="pergunta">Você ainda quer ver?</b>' +
       '<span class="big">Tem certeza, Big? 🤨</span>' +
-      '<span class="senha-dica">Para ver, escreva: <i>quero sim, senhor Capitão Big</i></span>' +
-      '<input class="senha" type="text" autocomplete="off" spellcheck="false" placeholder="quero sim, senhor Capitão Big">' +
+      '<span class="senha-dica">Para ver, escreva: <i>SIM SENHOR BIG</i></span>' +
+      '<input class="senha" type="text" autocomplete="off" spellcheck="false" placeholder="SIM SENHOR BIG">' +
       '<span class="credito" hidden></span>' +
       '<div class="botoes"><button class="nao">Não, deixa escondido</button><button class="sim">Sim, mostrar</button></div>' +
       "</div></div>";
@@ -416,7 +416,7 @@
   let aoConfirmar = null; // ação especial do "Sim" (capa da página inteira)
 
   // Frase que libera o "Sim" (sem ligar para acento, maiúscula ou vírgula).
-  const SENHA = "quero sim senhor capitao big";
+  const SENHA = "sim senhor big";
   function senhaCerta() {
     if (!ui) return false;
     const t = normalizar(ui.senha.value).replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
