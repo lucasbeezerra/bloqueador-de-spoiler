@@ -19,11 +19,23 @@
   button { flex: 1; border: 0; border-radius: 8px; padding: 9px; cursor: pointer; font: inherit; }
   #salvar { background: #b3261e; color: #fff; }
   #padrao { background: #eee; }
+  #novaVersao { display: none; margin: 0 0 12px; padding: 10px 12px; background: #e8f5ec; border: 1px solid #b7dcc3; border-radius: 10px; font-size: 13px; line-height: 1.4; }
+  #novaVersao b { color: #1b7a3a; }
+  #novaVersao ol { margin: 6px 0 8px; padding-left: 18px; }
+  #recarregar { background: #1b7a3a; color: #fff; width: 100%; }
   #aviso { color: #1b7a3a; font-size: 12px; height: 16px; margin-top: 8px; text-align: center; }
 </style>
 </head>
 <body>
   <h1>🛡️ Bloqueador de Spoiler</h1>
+  <div id="novaVersao">
+    <b>Versão nova disponível (<span id="numNova"></span>)!</b>
+    <ol>
+      <li>Abra a pasta onde está a extensão e dê dois cliques em <b>atualizar.bat</b>.</li>
+      <li>Quando aparecer "Pronto", volte aqui e clique no botão abaixo.</li>
+    </ol>
+    <button id="recarregar">Já atualizei, recarregar</button>
+  </div>
   <div class="linha">
     <span id="estado">Ligado</span>
     <label class="chave"><input type="checkbox" id="ligado" checked><span class="bola"></span></label>

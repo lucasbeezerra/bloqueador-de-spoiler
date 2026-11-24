@@ -58,3 +58,16 @@ $("padrao").addEventListener("click", () => {
   $("palavras").value = BSP_PALAVRAS_PADRAO.join("\n");
   chrome.storage.sync.remove("palavras", () => avisar("Lista original de volta."));
 });
+
+// ---------- Aviso de versão nova ----------
+chrome.runtime.sendMessage("conferirVersao").catch(() => {});
+function mostrarVersaoNova() {
+  chrome.storage.local.get("versaoNova", (cfg) => {
+    if (!cfg.versaoNova) return;
+    $("numNova").textContent = "versão " + cfg.versaoNova + ", você tem a " + chrome.runtime.getManifest().version;
+    $("novaVersao").style.display = "block";
+  });
+}
+mostrarVersaoNova();
+chrome.storage.onChanged.addListener((mud, area) => { if (area === "local" && mud.versaoNova) mostrarVersaoNova(); });
+$("recarregar").addEventListener("click", () => chrome.runtime.reload());

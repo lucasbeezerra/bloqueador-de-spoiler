@@ -38,7 +38,16 @@ A lista já vem com Vingadores, Doomsday, Guerras Secretas, Thanos, Doutor Desti
 
 ## Como atualizar
 
-Baixe o `.zip` novo, substitua o conteúdo da pasta `extensao` e clique no ↻ (recarregar) no cartão da extensão em `brave://extensions` (ou `chrome://extensions`).
+A partir da versão 1.6.0, a extensão confere sozinha (uma vez por dia) se saiu versão nova. Quando sair, aparece **NOVA** no ícone dela. Aí é só:
+
+1. Abrir a pasta da extensão e dar **dois cliques em `atualizar.bat`**. Ele baixa a versão nova e troca os arquivos sozinho.
+   Se o Windows mostrar um aviso de segurança, clique em **Executar** (ou "Mais informações" → "Executar assim mesmo").
+2. Clicar no ícone da extensão e em **"Já atualizei, recarregar"**.
+3. Apertar F5 nas abas que já estavam abertas.
+
+Suas palavras e sites liberados continuam salvos.
+
+**Quem está numa versão anterior à 1.6.0** precisa atualizar à mão só desta vez: baixe o `.zip` novo, substitua o conteúdo da pasta `extensao` e clique no ↻ (recarregar) no cartão da extensão em `brave://extensions` (ou `chrome://extensions`).
 
 ## Limitações
 
