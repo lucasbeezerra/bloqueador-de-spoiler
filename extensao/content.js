@@ -212,10 +212,14 @@
     (document.body || document.documentElement).appendChild(capa);
     capa.querySelector("#bsp-mostrar").addEventListener("click", (e) => {
       e.stopPropagation();
-      paginasReveladas.add(location.href);
-      capaUrl = null;
-      tirarCapa();
-      soltarVideos(document);
+      let caminho = location.pathname;
+      try { caminho = decodeURIComponent(caminho); } catch (er) {}
+      abrirConfirmacao(null, document.title + " " + caminho.replace(/[-_/+.]/g, " "), () => {
+        paginasReveladas.add(location.href);
+        capaUrl = null;
+        tirarCapa();
+        soltarVideos(document);
+      });
     });
     capa.querySelector("#bsp-voltar").addEventListener("click", (e) => {
       e.stopPropagation();
@@ -303,6 +307,23 @@
     @keyframes balanca { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-12deg) } 50% { transform: rotate(10deg) } 75% { transform: rotate(-5deg) } }
     b { font-size: 18px; }
     span { color: #5a5a5a; font-size: 14px; }
+    .caixa { max-width: 390px; max-height: calc(100vh - 32px); overflow-y: auto; }
+    .sub { font-size: 12.5px; margin-top: -4px; }
+    .resumo { list-style: none; margin: 6px 0 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 6px; }
+    .resumo li { display: flex; gap: 10px; align-items: center; background: #f5f5f8; border-radius: 12px; padding: 8px 12px; font-size: 14px; }
+    .resumo em { font-style: normal; font-size: 20px; line-height: 1; }
+    .resumo p { margin: 0; }
+    .resumo b { font-size: 14px; }
+    .fundo.on .resumo li { animation: entra .35s ease both; }
+    .fundo.on .resumo li:nth-child(2) { animation-delay: .06s; } .fundo.on .resumo li:nth-child(3) { animation-delay: .12s; }
+    .fundo.on .resumo li:nth-child(4) { animation-delay: .18s; } .fundo.on .resumo li:nth-child(n+5) { animation-delay: .24s; }
+    @keyframes entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .risco { text-align: left; margin-top: 4px; }
+    .risco-txt { font-size: 13px; font-weight: 600; color: #333; }
+    .barra { height: 8px; background: #ececf0; border-radius: 99px; overflow: hidden; margin-top: 5px; }
+    .barra i { display: block; height: 100%; width: 0; border-radius: 99px; transition: width .6s cubic-bezier(.34,1.56,.64,1); }
+    .pergunta { margin-top: 10px; }
+    .big { font-size: 15px; font-weight: 700; color: #b3261e; margin-top: -4px; }
     .botoes { display: flex; gap: 8px; margin-top: 10px; }
     button {
       flex: 1; border: 0; border-radius: 12px; padding: 11px 12px; font-size: 14px; font-weight: 600;
@@ -330,35 +351,59 @@
       "<style>" + CSS_UI + "</style>" +
       '<div class="etiqueta">🛡️ Spoiler escondido · clique para ver</div>' +
       '<div class="fundo"><div class="caixa" role="dialog" aria-modal="true">' +
-      '<div class="icone">🙈</div><b>Tem certeza que quer ver?</b>' +
-      "<span>Isso pode ter spoiler de Vingadores / Marvel.</span>" +
-      '<div class="botoes"><button class="nao">Deixa escondido</button><button class="sim">Mostrar</button></div>' +
+      '<div class="icone">🙈</div><b>Antes de mostrar, o que tem aí:</b>' +
+      '<span class="sub">Resumo sem spoiler: nomes e detalhes ficam escondidos.</span>' +
+      '<ul class="resumo"></ul>' +
+      '<div class="risco"><span class="risco-txt"></span><div class="barra"><i></i></div></div>' +
+      '<b class="pergunta">Você ainda quer ver?</b>' +
+      '<span class="big">Tem certeza, Big? 🤨</span>' +
+      '<div class="botoes"><button class="nao">Não, deixa escondido</button><button class="sim">Sim, mostrar</button></div>' +
       "</div></div>";
     document.documentElement.appendChild(host);
     ui = {
       host,
       etiqueta: raiz.querySelector(".etiqueta"),
       fundo: raiz.querySelector(".fundo"),
+      resumo: raiz.querySelector(".resumo"),
+      riscoTxt: raiz.querySelector(".risco-txt"),
+      barra: raiz.querySelector(".barra i"),
       nao: raiz.querySelector(".nao"),
       sim: raiz.querySelector(".sim")
     };
     ui.nao.addEventListener("click", fecharConfirmacao);
     ui.sim.addEventListener("click", () => {
-      const b = emEspera;
+      const b = emEspera, acao = aoConfirmar;
       fecharConfirmacao();
-      if (b) revelar(b);
+      if (acao) acao(); else if (b) revelar(b);
     });
     ui.fundo.addEventListener("click", (e) => { if (e.target === ui.fundo) fecharConfirmacao(); });
     raiz.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharConfirmacao(); });
     return ui;
   }
 
-  function abrirConfirmacao(b) {
+  // Monta o resumo sem spoiler (resumo.js) dentro da caixinha.
+  const RISCOS = [null, ["🟢 Risco de spoiler: baixo", "33%", "#2e9d4f"], ["🟡 Risco de spoiler: médio", "66%", "#e0a100"], ["🔴 Risco de spoiler: alto", "100%", "#b3261e"]];
+  function preencherResumo(u, texto, el) {
+    let r = { itens: [{ icone: "🤷", frase: "Não deu para resumir, mas cita Vingadores / Marvel" }], nivel: 2 };
+    try { if (typeof BSP_RESUMIR === "function") r = BSP_RESUMIR(texto, el); } catch (e) {}
+    u.resumo.innerHTML = r.itens.map((i) => '<li><em>' + i.icone + "</em><p>" + i.frase + "</p></li>").join("");
+    const [txt, larg, cor] = RISCOS[r.nivel] || RISCOS[2];
+    u.riscoTxt.textContent = txt;
+    u.barra.style.width = "0";
+    u.barra.style.background = cor;
+    setTimeout(() => { u.barra.style.width = larg; }, 120);
+  }
+
+  let aoConfirmar = null; // ação especial do "Sim" (capa da página inteira)
+
+  function abrirConfirmacao(b, texto, acao) {
     const u = pegarUI();
     esconderEtiqueta();
     if (emEspera) emEspera.classList.remove("bsp-escolhido");
-    emEspera = b;
-    b.classList.add("bsp-escolhido");
+    emEspera = b || null;
+    aoConfirmar = acao || null;
+    if (b) b.classList.add("bsp-escolhido");
+    preencherResumo(u, texto !== undefined ? texto : textoDoElemento(b), b);
     u.fundo.classList.add("on");
     setTimeout(() => u.nao.focus(), 50);
   }
@@ -366,6 +411,7 @@
   function fecharConfirmacao() {
     if (emEspera) emEspera.classList.remove("bsp-escolhido");
     emEspera = null;
+    aoConfirmar = null;
     if (ui) ui.fundo.classList.remove("on");
   }
 
