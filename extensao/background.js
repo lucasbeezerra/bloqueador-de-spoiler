@@ -33,3 +33,19 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(bspConferir);
 chrome.alarms.onAlarm.addListener((a) => { if (a.name === "conferirVersao") bspConferir(); });
 chrome.runtime.onMessage.addListener((msg) => { if (msg === "conferirVersao") bspConferir(); });
+
+// Música da confirmação: o site não deixa tocar direto, então toca numa página escondida da extensão.
+async function bspTocador(acao) {
+  if (acao === "parar" && !(await chrome.offscreen.hasDocument())) return;
+  if (!(await chrome.offscreen.hasDocument())) {
+    await chrome.offscreen.createDocument({
+      url: "tocador.html",
+      reasons: ["AUDIO_PLAYBACK"],
+      justification: "Música do aviso de confirmação"
+    });
+  }
+  chrome.runtime.sendMessage({ alvo: "tocador", musica: acao }).catch(() => {});
+}
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg && (msg.musica === "tocar" || msg.musica === "parar") && !msg.alvo) bspTocador(msg.musica).catch(() => {});
+});

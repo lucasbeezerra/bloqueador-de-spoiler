@@ -336,6 +336,16 @@
     .nao:hover { background: #e4e4e9; }
     .sim { background: #b3261e; color: #fff; }
     .sim:hover { background: #9c1f18; }
+    .sim:disabled { background: #d9a7a3; cursor: not-allowed; transform: none; box-shadow: none; }
+    .senha-dica { font-size: 13px; color: #333; margin-top: 4px; }
+    .senha-dica i { font-style: normal; font-weight: 700; color: #b3261e; }
+    .senha {
+      width: 100%; border: 2px solid #e2e2e8; border-radius: 12px; padding: 10px 12px; font-size: 14px;
+      outline: none; color: #1a1a1a; background: #fafafc; transition: border-color .15s ease;
+    }
+    .senha:focus { border-color: #b3261e; }
+    .senha.certo { border-color: #2e9d4f; background: #f1faf3; }
+    .musica { font-size: 12px; color: #888; }
   `;
 
   let ui = null;
@@ -357,6 +367,8 @@
       '<div class="risco"><span class="risco-txt"></span><div class="barra"><i></i></div></div>' +
       '<b class="pergunta">Você ainda quer ver?</b>' +
       '<span class="big">Tem certeza, Big? 🤨</span>' +
+      '<span class="senha-dica">Para ver, escreva: <i>quero sim, senhor Capitão Big</i></span>' +
+      '<input class="senha" type="text" autocomplete="off" spellcheck="false" placeholder="quero sim, senhor Capitão Big">' +
       '<div class="botoes"><button class="nao">Não, deixa escondido</button><button class="sim">Sim, mostrar</button></div>' +
       "</div></div>";
     document.documentElement.appendChild(host);
@@ -368,10 +380,14 @@
       riscoTxt: raiz.querySelector(".risco-txt"),
       barra: raiz.querySelector(".barra i"),
       nao: raiz.querySelector(".nao"),
-      sim: raiz.querySelector(".sim")
+      sim: raiz.querySelector(".sim"),
+      senha: raiz.querySelector(".senha")
     };
     ui.nao.addEventListener("click", fecharConfirmacao);
+    ui.senha.addEventListener("input", conferirSenha);
+    ui.senha.addEventListener("keydown", (e) => { if (e.key === "Enter" && !ui.sim.disabled) ui.sim.click(); });
     ui.sim.addEventListener("click", () => {
+      if (!senhaCerta()) return;
       const b = emEspera, acao = aoConfirmar;
       fecharConfirmacao();
       if (acao) acao(); else if (b) revelar(b);
@@ -396,6 +412,28 @@
 
   let aoConfirmar = null; // ação especial do "Sim" (capa da página inteira)
 
+  // Frase que libera o "Sim" (sem ligar para acento, maiúscula ou vírgula).
+  const SENHA = "quero sim senhor capitao big";
+  function senhaCerta() {
+    if (!ui) return false;
+    const t = normalizar(ui.senha.value).replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
+    return t.includes(SENHA);
+  }
+  function conferirSenha() {
+    const ok = senhaCerta();
+    ui.sim.disabled = !ok;
+    ui.senha.classList.toggle("certo", ok);
+  }
+
+  // Música da confirmação: toca o arquivo musica.mp3 da pasta da extensão (se existir).
+  let musicaTocando = false;
+  window.addEventListener("pagehide", () => musica("parar"));
+  function musica(acao) {
+    if (acao === "tocar" ? musicaTocando : !musicaTocando) return;
+    musicaTocando = acao === "tocar";
+    try { chrome.runtime.sendMessage({ musica: acao }).catch(() => {}); } catch (e) {}
+  }
+
   function abrirConfirmacao(b, texto, acao) {
     const u = pegarUI();
     esconderEtiqueta();
@@ -404,8 +442,11 @@
     aoConfirmar = acao || null;
     if (b) b.classList.add("bsp-escolhido");
     preencherResumo(u, texto !== undefined ? texto : textoDoElemento(b), b);
+    u.senha.value = "";
+    conferirSenha();
     u.fundo.classList.add("on");
-    setTimeout(() => u.nao.focus(), 50);
+    musica("tocar");
+    setTimeout(() => u.senha.focus(), 50);
   }
 
   function fecharConfirmacao() {
@@ -413,6 +454,7 @@
     emEspera = null;
     aoConfirmar = null;
     if (ui) ui.fundo.classList.remove("on");
+    musica("parar");
   }
 
   function revelar(b) {
